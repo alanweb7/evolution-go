@@ -1,4 +1,4 @@
-name: Build, Publish and Deploy
+name: Build and Publish Docker Image
 
 on:
   workflow_dispatch:
@@ -19,8 +19,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image_tag: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +34,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest,enable=${{ !contains(steps.version.outputs.version, '-beta') }}
+            type=raw,value=latest
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -66,24 +64,4 @@ jobs:
             VERSION=${{ steps.version.outputs.version }}
 
       - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-  deploy_portainer:
-    name: Deploy to Portainer
-    needs: build_and_publish
-    runs-on: ubuntu-latest
-    if: success()
-    steps:
-      - name: Deploy stack to Portainer
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PORTAINER_HOST }}
-          username: ${{ secrets.PORTAINER_SSH_USER }}
-          password: ${{ secrets.PORTAINER_SSH_PASSWORD }}
-          script: |
-            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build_and_publish.outputs.image_tag }}"
-            
-            docker service update \
-              --image "$IMAGE" \
-              --force \
-              evolution_go
+        run: echo "Image pushed: ${{ steps.docker_build.outputs.digest }}"
