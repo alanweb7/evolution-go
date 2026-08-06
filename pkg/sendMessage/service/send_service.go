@@ -525,9 +525,9 @@ func (s *sendService) validateAndCheckUserExists(phone string, formatJid *bool, 
 	}
 
 	// Get the client to check if user exists on WhatsApp
-	client, err := s.ensureClientConnected(instance.Id)
+	_, err := s.ensureClientConnected(instance.Id)
 	if err != nil {
-		return types.NewJID("", types.DefaultUserServer), fmt.Errorf("failed to connect client: %v", err)
+		return nil, err
 	}
 
 	// Use CheckUser approach: formatJid=false by default
