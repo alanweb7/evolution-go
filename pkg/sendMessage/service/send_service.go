@@ -525,9 +525,9 @@ func (s *sendService) validateAndCheckUserExists(phone string, formatJid *bool, 
 	}
 
 	// Get the client to check if user exists on WhatsApp
-	_, err := s.ensureClientConnected(instance.Id)
+	client, err := s.ensureClientConnected(instance.Id)
 	if err != nil {
-		return nil, err
+		return types.JID{}, err
 	}
 
 	// Use CheckUser approach: formatJid=false by default
@@ -1734,7 +1734,7 @@ func mapKeyType(keyType string) string {
 }
 
 func (s *sendService) SendButton(data *ButtonStruct, instance *instance_model.Instance) (*MessageSendStruct, error) {
-	client, err := s.ensureClientConnected(instance.Id)
+	_, err := s.ensureClientConnected(instance.Id)
 	if err != nil {
 		return nil, err
 	}
